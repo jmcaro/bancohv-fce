@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Admin | Banco HV FCE</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="bg-unia-gray min-h-screen font-sans">
+<%- include('../../partials/navbar') %>
+<main class="max-w-6xl mx-auto px-4 py-8">
+
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-unia-blue">Panel de Administración</h1>
+    <p class="text-sm text-gray-500 mt-1">Facultad de Ciencias Económicas · Universidad del Atlántico</p>
+  </div>
+
+  <!-- Estadísticas -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="bg-white rounded-xl shadow p-5 border-t-4 border-unia-blue text-center">
+      <p class="text-3xl font-bold text-unia-blue"><%= stats.totalUsers %></p>
+      <p class="text-sm text-gray-500 mt-1">Usuarios registrados</p>
+    </div>
+    <div class="bg-white rounded-xl shadow p-5 border-t-4 border-unia-orange text-center">
+      <p class="text-3xl font-bold text-unia-blue"><%= stats.totalCVs %></p>
+      <p class="text-sm text-gray-500 mt-1">Hojas de vida</p>
+    </div>
+    <div class="bg-white rounded-xl shadow p-5 border-t-4 border-green-500 text-center">
+      <p class="text-3xl font-bold text-unia-blue"><%= stats.totalVacancies %></p>
+      <p class="text-sm text-gray-500 mt-1">Vacantes abiertas</p>
+    </div>
+    <div class="bg-white rounded-xl shadow p-5 border-t-4 border-purple-500 text-center">
+      <p class="text-3xl font-bold text-unia-blue"><%= stats.totalApplications %></p>
+      <p class="text-sm text-gray-500 mt-1">Postulaciones</p>
+    </div>
+  </div>
+
+  <!-- Navegación Admin -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <a href="/admin/users" class="bg-white rounded-xl shadow p-5 hover:shadow-md transition-shadow flex items-center gap-4">
+      <span class="text-3xl">👥</span>
+      <div>
+        <p class="font-bold text-unia-blue">Usuarios</p>
+        <p class="text-xs text-gray-500">Gestionar roles y accesos</p>
+      </div>
+    </a>
+    <a href="/admin/vacancies" class="bg-white rounded-xl shadow p-5 hover:shadow-md transition-shadow flex items-center gap-4">
+      <span class="text-3xl">💼</span>
+      <div>
+        <p class="font-bold text-unia-blue">Moderar vacantes</p>
+        <p class="text-xs text-gray-500">Ver y gestionar todas</p>
+      </div>
+    </a>
+    <a href="/company/vacancies/new" class="bg-white rounded-xl shadow p-5 hover:shadow-md transition-shadow flex items-center gap-4 border-2 border-unia-orange">
+      <span class="text-3xl">➕</span>
+      <div>
+        <p class="font-bold text-unia-blue">Crear vacante</p>
+        <p class="text-xs text-gray-500">Publicar nueva oferta</p>
+      </div>
+    </a>
+    <a href="/vacancies" class="bg-white rounded-xl shadow p-5 hover:shadow-md transition-shadow flex items-center gap-4">
+      <span class="text-3xl">🔍</span>
+      <div>
+        <p class="font-bold text-unia-blue">Bolsa de empleo</p>
+        <p class="text-xs text-gray-500">Vista pública de vacantes</p>
+      </div>
+    </a>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+    <!-- Usuarios recientes -->
+    <div class="bg-white rounded-xl shadow p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-bold text-unia-blue">Usuarios recientes</h2>
+        <a href="/admin/users" class="text-xs text-unia-blue hover:underline">Ver todos →</a>
+      </div>
+      <ul class="divide-y divide-gray-100">
+        <% recentUsers.forEach(u => { %>
+        <li class="py-3 flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-800"><%= u.name %></p>
+            <p class="text-xs text-gray-400"><%= u.email %></p>
+          </div>
+          <div class="flex flex-wrap gap-1">
+            <% (u.roles ?? []).forEach(r => { %>
+              <span class="text-xs px-2 py-0.5 rounded-full font-semibold
+                <%= r === 'ADMIN' ? 'bg-red-100 text-red-700' :
+                   r === 'LIDER' ? 'bg-unia-orange/30 text-yellow-800' :
+                   'bg-unia-gray text-unia-blue' %>">
+                <%= r %>
+              </span>
+            <% }) %>
+          </div>
+        </li>
+        <% }) %>
+      </ul>
+    </div>
+
+    <!-- Postulaciones recientes -->
+    <div class="bg-white rounded-xl shadow p-6">
+      <h2 class="font-bold text-unia-blue mb-4">Postulaciones recientes</h2>
+      <ul class="divide-y divide-gray-100">
+        <% recentApplications.forEach(a => { %>
+        <li class="py-3">
+          <p class="text-sm font-medium text-gray-800"><%= a.user.name %></p>
+          <p class="text-xs text-gray-500">→ <%= a.vacancy.title %></p>
+          <p class="text-xs text-gray-400 mt-0.5"><%= new Date(a.appliedAt).toLocaleDateString('es-CO') %></p>
+        </li>
+        <% }) %>
+      </ul>
+    </div>
+
+  </div>
+
+</main>
+<%- include('../../partials/footer') %>
+</body>
+</html>

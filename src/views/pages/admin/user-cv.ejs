@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HV de <%= target.name %> | Admin</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="bg-unia-gray min-h-screen font-sans">
+<%- include('../../partials/navbar') %>
+<main class="max-w-3xl mx-auto px-4 py-8">
+
+  <a href="/admin/users" class="text-sm text-unia-blue hover:underline mb-4 inline-block">← Volver a usuarios</a>
+
+  <div class="bg-white rounded-xl shadow p-8">
+
+    <!-- Encabezado -->
+    <div class="flex items-center gap-5 mb-8 pb-6 border-b border-gray-100">
+      <% if (target.photo) { %>
+        <img src="<%= target.photo %>" class="w-16 h-16 rounded-full object-cover border-2 border-unia-orange" />
+      <% } else { %>
+        <div class="w-16 h-16 rounded-full bg-unia-gray flex items-center justify-center text-2xl border-2 border-dashed border-gray-300">👤</div>
+      <% } %>
+      <div>
+        <h1 class="text-xl font-bold text-unia-blue"><%= target.name %></h1>
+        <p class="text-sm text-gray-500"><%= target.email %></p>
+        <% if (target.cv?.city || target.cv?.phone) { %>
+          <p class="text-xs text-gray-400 mt-1"><%= [target.cv.city, target.cv.phone].filter(Boolean).join(' · ') %></p>
+        <% } %>
+      </div>
+      <% if (target.cv?.cvFileUrl) { %>
+        <a href="<%= target.cv.cvFileUrl %>" target="_blank"
+           class="ml-auto text-sm bg-unia-orange text-unia-blue font-semibold px-4 py-2 rounded-lg hover:bg-unia-orange-light">
+          Descargar HV
+        </a>
+      <% } %>
+    </div>
+
+    <% if (!target.cv) { %>
+      <p class="text-center text-gray-400 py-8">Este usuario aún no ha creado su hoja de vida.</p>
+    <% } else { %>
+
+      <% if (target.cv.summary) { %>
+      <div class="mb-6">
+        <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Perfil</h2>
+        <p class="text-sm text-gray-700"><%= target.cv.summary %></p>
+      </div>
+      <% } %>
+
+      <% if (target.cv.education.length > 0) { %>
+      <div class="mb-6">
+        <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Formación Académica</h2>
+        <ul class="space-y-2">
+          <% target.cv.education.forEach(e => { %>
+          <li class="text-sm">
+            <span class="font-semibold text-gray-800"><%= e.degree %><% if (e.field) { %> · <%= e.field %><% } %></span>
+            <span class="text-gray-500"> — <%= e.institution %></span>
+            <span class="text-gray-400 text-xs"> (<%= e.startYear %>–<%= e.current ? 'Presente' : (e.endYear ?? '') %>)</span>
+          </li>
+          <% }) %>
+        </ul>
+      </div>
+      <% } %>
+
+      <% if (target.cv.experience.length > 0) { %>
+      <div class="mb-6">
+        <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Experiencia Laboral</h2>
+        <ul class="space-y-3">
+          <% target.cv.experience.forEach(e => { %>
+          <li class="text-sm">
+            <span class="font-semibold text-gray-800"><%= e.position %></span>
+            <span class="text-gray-500"> · <%= e.company %></span>
+            <span class="text-gray-400 text-xs"> (<%= new Date(e.startDate).getFullYear() %>–<%= e.current ? 'Presente' : (e.endDate ? new Date(e.endDate).getFullYear() : '') %>)</span>
+            <% if (e.description) { %><p class="text-gray-500 text-xs mt-0.5"><%= e.description %></p><% } %>
+          </li>
+          <% }) %>
+        </ul>
+      </div>
+      <% } %>
+
+      <div class="grid grid-cols-2 gap-6 mb-6">
+        <% if (target.cv.skills.length > 0) { %>
+        <div>
+          <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Habilidades</h2>
+          <div class="flex flex-wrap gap-1">
+            <% target.cv.skills.forEach(s => { %>
+              <span class="text-xs bg-unia-gray border border-gray-200 px-2 py-0.5 rounded-full"><%= s.name %><% if (s.level) { %> · <span class="text-gray-400"><%= s.level %></span><% } %></span>
+            <% }) %>
+          </div>
+        </div>
+        <% } %>
+        <% if (target.cv.languages.length > 0) { %>
+        <div>
+          <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Idiomas</h2>
+          <ul class="space-y-1">
+            <% target.cv.languages.forEach(l => { %>
+              <li class="text-xs text-gray-700"><span class="font-medium"><%= l.name %></span> · <%= l.level %></li>
+            <% }) %>
+          </ul>
+        </div>
+        <% } %>
+      </div>
+
+      <% if (target.cv.documents.length > 0) { %>
+      <div>
+        <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Soportes</h2>
+        <ul class="space-y-1">
+          <% target.cv.documents.forEach(d => { %>
+          <li class="text-sm flex items-center gap-2">
+            <span class="text-gray-400 text-xs capitalize">[<%= d.type %>]</span>
+            <a href="<%= d.fileUrl %>" target="_blank" class="text-unia-blue hover:underline"><%= d.name %></a>
+          </li>
+          <% }) %>
+        </ul>
+      </div>
+      <% } %>
+
+    <% } %>
+  </div>
+
+</main>
+<%- include('../../partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Hoja de Vida | Banco HV FCE</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="bg-unia-gray min-h-screen font-sans">
+  <%- include('../../partials/navbar') %>
+
+  <main class="max-w-4xl mx-auto px-4 py-8 space-y-8">
+
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-bold text-unia-blue">Mi Hoja de Vida</h1>
+      <% if (cv && cv.cvFileUrl) { %>
+        <a href="<%= cv.cvFileUrl %>" target="_blank"
+           class="text-sm bg-unia-orange text-unia-blue font-semibold px-4 py-2 rounded-lg hover:bg-unia-orange-light transition-colors">
+          Ver HV subida
+        </a>
+      <% } %>
+    </div>
+
+    <!-- ── DATOS PERSONALES ─────────────────────────────────────────── -->
+    <section id="personal" class="bg-white rounded-xl shadow p-6">
+      <h2 class="text-lg font-bold text-unia-blue mb-4 border-b border-gray-100 pb-2">Datos Personales</h2>
+      <form action="/cv/personal" method="POST" enctype="multipart/form-data" class="space-y-4">
+
+        <div class="flex items-center gap-6 mb-4">
+          <% if (cv && cv.photoUrl) { %>
+            <img src="<%= cv.photoUrl %>" alt="Foto" class="w-20 h-20 rounded-full object-cover border-2 border-unia-orange" />
+          <% } else { %>
+            <div class="w-20 h-20 rounded-full bg-unia-gray flex items-center justify-center border-2 border-dashed border-gray-300">
+              <span class="text-2xl">👤</span>
+            </div>
+          <% } %>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Foto de perfil</label>
+            <input type="file" name="photo" accept="image/*"
+                   class="text-sm text-gray-500 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-unia-blue file:text-white file:text-sm file:cursor-pointer" />
+            <p class="text-xs text-gray-400 mt-1">Máximo 3 MB. JPG o PNG.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+            <input type="text" name="phone" value="<%= cv?.phone ?? '' %>"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
+            <input type="text" name="city" value="<%= cv?.city ?? '' %>"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Perfil / Resumen profesional</label>
+          <textarea name="summary" rows="4"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue resize-none"><%= cv?.summary ?? '' %></textarea>
+        </div>
+
+        <button type="submit"
+                class="bg-unia-blue text-white font-semibold px-6 py-2 rounded-lg hover:bg-unia-blue-light transition-colors text-sm">
+          Guardar datos personales
+        </button>
+      </form>
+
+      <!-- Subir archivo HV -->
+      <div class="mt-6 pt-6 border-t border-gray-100">
+        <h3 class="text-sm font-bold text-gray-700 mb-3">Subir Hoja de Vida (PDF o Word)</h3>
+        <form action="/cv/cv-file" method="POST" enctype="multipart/form-data" class="flex items-center gap-3">
+          <input type="file" name="cvFile" accept=".pdf,.doc,.docx"
+                 class="text-sm text-gray-500 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-unia-orange file:text-unia-blue file:font-semibold file:text-sm file:cursor-pointer" />
+          <button type="submit"
+                  class="bg-unia-orange text-unia-blue font-semibold px-4 py-2 rounded-lg hover:bg-unia-orange-light transition-colors text-sm">
+            Subir
+          </button>
+        </form>
+        <% if (cv && cv.cvFileUrl) { %>
+          <p class="text-xs text-green-600 mt-2">✓ Archivo subido · <a href="<%= cv.cvFileUrl %>" target="_blank" class="underline">Ver</a></p>
+        <% } %>
+      </div>
+    </section>
+
+    <!-- ── EDUCACIÓN ───────────────────────────────────────────────── -->
+    <section id="educacion" class="bg-white rounded-xl shadow p-6">
+      <h2 class="text-lg font-bold text-unia-blue mb-4 border-b border-gray-100 pb-2">Formación Académica</h2>
+
+      <% if (cv && cv.education.length > 0) { %>
+        <ul class="divide-y divide-gray-100 mb-6">
+          <% cv.education.forEach(e => { %>
+          <li class="py-3 flex items-start justify-between gap-4">
+            <div>
+              <p class="font-semibold text-sm text-gray-800"><%= e.degree %><% if (e.field) { %> · <span class="font-normal"><%= e.field %></span><% } %></p>
+              <p class="text-xs text-gray-500"><%= e.institution %> · <%= e.startYear %> – <%= e.current ? 'Presente' : (e.endYear ?? '') %></p>
+            </div>
+            <form action="/cv/education/<%= e.id %>/delete" method="POST">
+              <button class="text-xs text-red-500 hover:text-red-700">Eliminar</button>
+            </form>
+          </li>
+          <% }) %>
+        </ul>
+      <% } %>
+
+      <form action="/cv/education" method="POST" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <input type="text" name="institution" placeholder="Institución *" required
+               class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue" />
+        <input type="text" name="degree" placeholder="Título / Nivel *" required
+               class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue" />
+        <input type="text" name="field" placeholder="Área de estudio"
+               class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue" />
+        <div class="flex gap-2">
+          <input type="number" name="startYear" placeholder="Año inicio *" required min="1950" max="2100"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue" />
+          <input type="number" name="endYear" placeholder="Año fin"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue" />
+        </div>
+        <label class="flex items-center gap-2 text-sm text-gray-600 sm:col-span-2">
+          <input type="checkbox" name="current" value="true" class="accent-unia-blue" /> En curso
+        </label>
+        <button type="submit"
+                class="sm:col-span-2 bg-unia-blue text-white font-semibold px-4 py-2 rounded-lg hover:bg-unia-blue-light transition-colors text-sm w-fit">
+          + Agregar educación
+        </button>
+      </form>
+    </section>
+
+    <!-- ── EXPERIENCIA ─────────────────────────────────────────────── -->
+    <section id="experiencia" class="bg-white rounded-xl shadow p-6">
+      <h2 class="text-lg font-bold text-unia-blue mb-4 border-b border-gray-100 pb-2">Experiencia Laboral</h2>
+
+      <% if (cv && cv.experience.length > 0) { %>
+        <ul class="divide-y divide-gray-100 mb-6">
+          <% cv.experience.forEach(e => { %>
+          <li class="py-3 flex items-start justify-between gap-4">
+            <div>
+              <p class="font-semibold text-sm text-gray-800"><%= e.position %> · <span class="font-normal"><%= e.company %></span></p>
+              <p class="text-xs text-gray-500"><%= new Date(e.startDate).getFullYear() %> – <%= e.current ? 'Presente' : (e.endDate ? new Date(e.endDate).getFullYear() : '') %></p>
+              <% if (e.description) { %><p class="text-xs text-gray-400 mt-1"><%= e.description %></p><% } %>
+            </div>
+            <form action="/cv/experience/<%= e.id %>/delete" method="POST">
+              <button class="text-xs text-red-500 hover:text-red-700">Eliminar</button>
+            </form>
+          </li>
+          <% }) %>
+        </ul>
+      <% } %>
+
+      <form action="/cv/experience" method="POST" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <input type="text" name="company" placeholder="Empresa *" required
+               class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue" />
+        <input type="text" name="position" placeholder="Cargo *" required
+               class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue" />
+        <textarea name="description" placeholder="Descripción de funciones" rows="2"
+                  class="sm:col-span-2 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue resize-none"></textarea>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Fecha inicio *</label>
+          <input type="date" name="startDate" required
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue" />
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Fecha fin</label>
+          <input type="date" name="endDate"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue" />
+        </div>
+        <label class="flex items-center gap-2 text-sm text-gray-600 sm:col-span-2">
+          <input type="checkbox" name="current" value="true" class="accent-unia-blue" /> Trabajo actual
+        </label>
+        <button type="submit"
+                class="sm:col-span-2 bg-unia-blue text-white font-semibold px-4 py-2 rounded-lg hover:bg-unia-blue-light transition-colors text-sm w-fit">
+          + Agregar experiencia
+        </button>
+      </form>
+    </section>
+
+    <!-- ── HABILIDADES ─────────────────────────────────────────────── -->
+    <section id="habilidades" class="bg-white rounded-xl shadow p-6">
+      <h2 class="text-lg font-bold text-unia-blue mb-4 border-b border-gray-100 pb-2">Habilidades</h2>
+
+      <% if (cv && cv.skills.length > 0) { %>
+        <div class="flex flex-wrap gap-2 mb-6">
+          <% cv.skills.forEach(s => { %>
+            <span class="inline-flex items-center gap-2 bg-unia-gray border border-gray-200 text-sm px-3 py-1 rounded-full">
+              <%= s.name %><% if (s.level) { %> · <span class="text-xs text-gray-400"><%= s.level %></span><% } %>
+              <form action="/cv/skills/<%= s.id %>/delete" method="POST" class="inline">
+                <button class="text-red-400 hover:text-red-600 text-xs leading-none">×</button>
+              </form>
+            </span>
+          <% }) %>
+        </div>
+      <% } %>
+
+      <form action="/cv/skills" method="POST" class="flex flex-wrap gap-3">
+        <input type="text" name="name" placeholder="Habilidad (ej: Excel, Python...)" required
+               class="flex-1 min-w-40 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue" />
+        <select name="level" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue">
+          <option value="">Nivel (opcional)</option>
+          <option>Básico</option><option>Intermedio</option><option>Avanzado</option><option>Experto</option>
+        </select>
+        <button type="submit"
+                class="bg-unia-blue text-white font-semibold px-4 py-2 rounded-lg hover:bg-unia-blue-light transition-colors text-sm">
+          + Agregar
+        </button>
+      </form>
+    </section>
+
+    <!-- ── IDIOMAS ─────────────────────────────────────────────────── -->
+    <section id="idiomas" class="bg-white rounded-xl shadow p-6">
+      <h2 class="text-lg font-bold text-unia-blue mb-4 border-b border-gray-100 pb-2">Idiomas</h2>
+
+      <% if (cv && cv.languages.length > 0) { %>
+        <ul class="divide-y divide-gray-100 mb-6">
+          <% cv.languages.forEach(l => { %>
+          <li class="py-2 flex justify-between items-center text-sm">
+            <span><span class="font-medium"><%= l.name %></span> · <span class="text-gray-500"><%= l.level %></span></span>
+            <form action="/cv/languages/<%= l.id %>/delete" method="POST">
+              <button class="text-xs text-red-500 hover:text-red-700">Eliminar</button>
+            </form>
+          </li>
+          <% }) %>
+        </ul>
+      <% } %>
+
+      <form action="/cv/languages" method="POST" class="flex flex-wrap gap-3">
+        <input type="text" name="name" placeholder="Idioma (ej: Inglés)" required
+               class="flex-1 min-w-40 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue" />
+        <select name="level" required class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue">
+          <option value="">Nivel *</option>
+          <option>A1 - Principiante</option><option>A2 - Básico</option>
+          <option>B1 - Intermedio</option><option>B2 - Intermedio alto</option>
+          <option>C1 - Avanzado</option><option>C2 - Dominio pleno</option>
+          <option>Nativo</option>
+        </select>
+        <button type="submit"
+                class="bg-unia-blue text-white font-semibold px-4 py-2 rounded-lg hover:bg-unia-blue-light transition-colors text-sm">
+          + Agregar
+        </button>
+      </form>
+    </section>
+
+    <!-- ── SOPORTES ────────────────────────────────────────────────── -->
+    <section id="soportes" class="bg-white rounded-xl shadow p-6">
+      <h2 class="text-lg font-bold text-unia-blue mb-4 border-b border-gray-100 pb-2">Soportes y Documentos</h2>
+
+      <% if (cv && cv.documents.length > 0) { %>
+        <ul class="divide-y divide-gray-100 mb-6">
+          <% cv.documents.forEach(d => { %>
+          <li class="py-3 flex justify-between items-center gap-4">
+            <div>
+              <p class="text-sm font-medium text-gray-800"><%= d.name %></p>
+              <p class="text-xs text-gray-400 capitalize"><%= d.type %></p>
+            </div>
+            <div class="flex items-center gap-3">
+              <a href="<%= d.fileUrl %>" target="_blank" class="text-xs text-unia-blue underline">Ver</a>
+              <form action="/cv/documents/<%= d.id %>/delete" method="POST">
+                <button class="text-xs text-red-500 hover:text-red-700">Eliminar</button>
+              </form>
+            </div>
+          </li>
+          <% }) %>
+        </ul>
+      <% } %>
+
+      <form action="/cv/documents" method="POST" enctype="multipart/form-data" class="space-y-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <input type="text" name="name" placeholder="Nombre del documento"
+                 class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue" />
+          <select name="type" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue">
+            <option value="diploma">Diploma / Título</option>
+            <option value="certificado">Certificado</option>
+            <option value="referencia">Carta de referencia</option>
+            <option value="constancia">Constancia laboral</option>
+            <option value="portafolio">Portafolio</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-3">
+          <input type="file" name="file" required accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                 class="text-sm text-gray-500 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-unia-blue file:text-white file:text-sm file:cursor-pointer" />
+          <button type="submit"
+                  class="bg-unia-blue text-white font-semibold px-4 py-2 rounded-lg hover:bg-unia-blue-light transition-colors text-sm whitespace-nowrap">
+            + Subir soporte
+          </button>
+        </div>
+        <p class="text-xs text-gray-400">PDF, Word o imagen. Máximo <%= 10 %> MB.</p>
+      </form>
+    </section>
+
+  </main>
+  <%- include('../../partials/footer') %>
+</body>
+</html>

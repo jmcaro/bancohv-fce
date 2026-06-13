@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= vacancy ? 'Editar' : 'Nueva' %> Vacante | Banco HV FCE</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="bg-unia-gray min-h-screen font-sans">
+<%- include('../../partials/navbar') %>
+<main class="max-w-2xl mx-auto px-4 py-8">
+
+  <a href="/company/vacancies" class="text-sm text-unia-blue hover:underline mb-4 inline-block">← Volver</a>
+  <h1 class="text-2xl font-bold text-unia-blue mb-6"><%= vacancy ? 'Editar vacante' : 'Publicar nueva vacante' %></h1>
+
+  <div class="bg-white rounded-xl shadow p-8">
+    <form action="<%= vacancy ? '/company/vacancies/' + vacancy.id : '/company/vacancies' %>" method="POST" class="space-y-5">
+
+      <!-- Empresa -->
+      <div>
+        <label class="block text-sm font-bold text-gray-700 mb-2">Empresa *</label>
+
+        <% if (companies.length > 0) { %>
+          <div class="space-y-2 mb-3">
+            <label class="flex items-center gap-2 text-sm cursor-pointer">
+              <input type="radio" name="companyChoice" value="existing" checked
+                     class="accent-unia-blue" onchange="toggleCompany(this.value)" />
+              Seleccionar empresa existente
+            </label>
+            <label class="flex items-center gap-2 text-sm cursor-pointer">
+              <input type="radio" name="companyChoice" value="new"
+                     class="accent-unia-blue" onchange="toggleCompany(this.value)" />
+              Crear nueva empresa
+            </label>
+          </div>
+
+          <div id="existing-company">
+            <select name="companyId"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue">
+              <option value="">— Selecciona una empresa —</option>
+              <% companies.forEach(c => { %>
+                <option value="<%= c.id %>"
+                  <%= (vacancy?.companyId === c.id || (!vacancy && myCompany?.id === c.id)) ? 'selected' : '' %>>
+                  <%= c.name %><%= myCompany?.id === c.id ? ' (mi empresa)' : '' %>
+                </option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div id="new-company" class="hidden">
+            <input type="text" name="newCompany" placeholder="Nombre de la nueva empresa"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue" />
+          </div>
+        <% } else { %>
+          <p class="text-xs text-gray-500 mb-2">No hay empresas registradas. Se creará una nueva.</p>
+          <input type="text" name="newCompany" placeholder="Nombre de la empresa *" required
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue" />
+        <% } %>
+      </div>
+
+      <!-- Título -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Título del cargo *</label>
+        <input type="text" name="title" value="<%= vacancy?.title ?? '' %>" required
+               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Área *</label>
+          <input type="text" name="area" value="<%= vacancy?.area ?? '' %>" required
+                 placeholder="Ej: Contabilidad, Economía..."
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de contrato *</label>
+          <select name="type" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue">
+            <% ['Tiempo completo','Medio tiempo','Práctica','Pasantía','Freelance'].forEach(t => { %>
+              <option value="<%= t %>" <%= vacancy?.type === t ? 'selected' : '' %>><%= t %></option>
+            <% }) %>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Ciudad / Ubicación</label>
+          <input type="text" name="location" value="<%= vacancy?.location ?? '' %>"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Salario (opcional)</label>
+          <input type="text" name="salary" value="<%= vacancy?.salary ?? '' %>" placeholder="Ej: $2.000.000 - $3.000.000"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue" />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Descripción del cargo *</label>
+        <textarea name="description" rows="6" required
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue resize-none"><%= vacancy?.description ?? '' %></textarea>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Requisitos</label>
+        <textarea name="requirements" rows="4"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue resize-none"><%= vacancy?.requirements ?? '' %></textarea>
+      </div>
+
+      <button type="submit" class="w-full bg-unia-blue text-white font-bold py-3 rounded-lg hover:bg-unia-blue-light transition-colors">
+        <%= vacancy ? 'Guardar cambios' : 'Publicar vacante' %>
+      </button>
+    </form>
+  </div>
+
+</main>
+
+<script>
+function toggleCompany(value) {
+  document.getElementById('existing-company').classList.toggle('hidden', value === 'new')
+  document.getElementById('new-company').classList.toggle('hidden', value === 'existing')
+  // Limpiar el campo que no se usa
+  if (value === 'new') {
+    document.querySelector('[name="companyId"]').value = ''
+  } else {
+    document.querySelector('[name="newCompany"]').value = ''
+  }
+}
+</script>
+
+<%- include('../../partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= candidate.name %> | Perfil Candidato</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="bg-unia-gray min-h-screen font-sans">
+<%- include('../../partials/navbar') %>
+<main class="max-w-3xl mx-auto px-4 py-8">
+
+  <a href="javascript:history.back()" class="text-sm text-unia-blue hover:underline mb-4 inline-block">← Volver</a>
+
+  <div class="bg-white rounded-xl shadow overflow-hidden">
+
+    <!-- Encabezado azul -->
+    <div class="bg-unia-blue px-8 py-6 flex items-center gap-6">
+      <% if (candidate.photo) { %>
+        <img src="<%= candidate.photo %>" class="w-20 h-20 rounded-full object-cover border-4 border-unia-orange" />
+      <% } else { %>
+        <div class="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center text-4xl border-4 border-unia-orange">👤</div>
+      <% } %>
+      <div class="text-white">
+        <h1 class="text-xl font-bold"><%= candidate.name %></h1>
+        <p class="text-white/70 text-sm"><%= candidate.email %></p>
+        <% if (candidate.cv?.city || candidate.cv?.phone) { %>
+          <p class="text-white/60 text-xs mt-1">
+            <%= [candidate.cv.city, candidate.cv.phone].filter(Boolean).join(' · ') %>
+          </p>
+        <% } %>
+      </div>
+      <% if (candidate.cv?.cvFileUrl) { %>
+        <a href="<%= candidate.cv.cvFileUrl %>" target="_blank"
+           class="ml-auto bg-unia-orange text-unia-blue font-semibold px-4 py-2 rounded-lg text-sm hover:bg-unia-orange-light transition-colors shrink-0">
+          Descargar HV
+        </a>
+      <% } %>
+    </div>
+
+    <div class="px-8 py-6 space-y-7">
+
+      <% if (!candidate.cv) { %>
+        <p class="text-center text-gray-400 py-8">Este candidato aún no ha completado su hoja de vida.</p>
+      <% } else { %>
+
+        <!-- Perfil -->
+        <% if (candidate.cv.summary) { %>
+        <div>
+          <h2 class="text-xs font-bold text-unia-blue uppercase tracking-widest mb-2">Perfil Profesional</h2>
+          <p class="text-sm text-gray-700 leading-relaxed"><%= candidate.cv.summary %></p>
+        </div>
+        <% } %>
+
+        <!-- Educación -->
+        <% if (candidate.cv.education.length > 0) { %>
+        <div>
+          <h2 class="text-xs font-bold text-unia-blue uppercase tracking-widest mb-3">Formación Académica</h2>
+          <ul class="space-y-3">
+            <% candidate.cv.education.forEach(e => { %>
+            <li class="flex gap-3">
+              <div class="mt-1 w-2 h-2 rounded-full bg-unia-orange shrink-0"></div>
+              <div>
+                <p class="text-sm font-semibold text-gray-800"><%= e.degree %><% if (e.field) { %> · <span class="font-normal text-gray-600"><%= e.field %></span><% } %></p>
+                <p class="text-xs text-gray-500"><%= e.institution %></p>
+                <p class="text-xs text-gray-400"><%= e.startYear %> – <%= e.current ? 'Presente' : (e.endYear ?? '') %></p>
+              </div>
+            </li>
+            <% }) %>
+          </ul>
+        </div>
+        <% } %>
+
+        <!-- Experiencia -->
+        <% if (candidate.cv.experience.length > 0) { %>
+        <div>
+          <h2 class="text-xs font-bold text-unia-blue uppercase tracking-widest mb-3">Experiencia Laboral</h2>
+          <ul class="space-y-4">
+            <% candidate.cv.experience.forEach(e => { %>
+            <li class="flex gap-3">
+              <div class="mt-1 w-2 h-2 rounded-full bg-unia-orange shrink-0"></div>
+              <div>
+                <p class="text-sm font-semibold text-gray-800"><%= e.position %></p>
+                <p class="text-xs text-gray-600 font-medium"><%= e.company %></p>
+                <p class="text-xs text-gray-400">
+                  <%= new Date(e.startDate).toLocaleDateString('es-CO', {month:'short', year:'numeric'}) %> –
+                  <%= e.current ? 'Presente' : (e.endDate ? new Date(e.endDate).toLocaleDateString('es-CO', {month:'short', year:'numeric'}) : '') %>
+                </p>
+                <% if (e.description) { %><p class="text-xs text-gray-500 mt-1"><%= e.description %></p><% } %>
+              </div>
+            </li>
+            <% }) %>
+          </ul>
+        </div>
+        <% } %>
+
+        <!-- Habilidades e Idiomas -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <% if (candidate.cv.skills.length > 0) { %>
+          <div>
+            <h2 class="text-xs font-bold text-unia-blue uppercase tracking-widest mb-3">Habilidades</h2>
+            <div class="flex flex-wrap gap-2">
+              <% candidate.cv.skills.forEach(s => { %>
+                <span class="text-xs bg-unia-gray border border-gray-200 px-3 py-1 rounded-full text-gray-700">
+                  <%= s.name %><% if (s.level) { %> <span class="text-gray-400">· <%= s.level %></span><% } %>
+                </span>
+              <% }) %>
+            </div>
+          </div>
+          <% } %>
+
+          <% if (candidate.cv.languages.length > 0) { %>
+          <div>
+            <h2 class="text-xs font-bold text-unia-blue uppercase tracking-widest mb-3">Idiomas</h2>
+            <ul class="space-y-1">
+              <% candidate.cv.languages.forEach(l => { %>
+                <li class="text-sm text-gray-700"><span class="font-medium"><%= l.name %></span> · <span class="text-gray-500 text-xs"><%= l.level %></span></li>
+              <% }) %>
+            </ul>
+          </div>
+          <% } %>
+        </div>
+
+        <!-- Documentos -->
+        <% if (candidate.cv.documents.length > 0) { %>
+        <div>
+          <h2 class="text-xs font-bold text-unia-blue uppercase tracking-widest mb-3">Soportes y Documentos</h2>
+          <ul class="space-y-2">
+            <% candidate.cv.documents.forEach(d => { %>
+            <li class="flex items-center gap-3 text-sm">
+              <span class="text-gray-400 text-xs capitalize w-24 shrink-0">[<%= d.type %>]</span>
+              <a href="<%= d.fileUrl %>" target="_blank" class="text-unia-blue hover:underline"><%= d.name %></a>
+            </li>
+            <% }) %>
+          </ul>
+        </div>
+        <% } %>
+
+      <% } %>
+    </div>
+  </div>
+
+</main>
+<%- include('../../partials/footer') %>
+</body>
+</html>

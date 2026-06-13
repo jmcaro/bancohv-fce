@@ -1,0 +1,183 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  LIDER
+  ADMIN
+}
+
+enum ApplicationStatus {
+  PENDING
+  REVIEWED
+  ACCEPTED
+  REJECTED
+}
+
+enum VacancyStatus {
+  OPEN
+  CLOSED
+  DRAFT
+}
+
+model User {
+  id          String    @id @default(cuid())
+  email       String    @unique
+  name        String
+  photo       String?
+  roles       Role[]    @default([STUDENT])
+  googleId    String?   @unique
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  cv          CurriculumVitae?
+  company     Company?
+  applications Application[]
+
+  @@map("users")
+}
+
+model CurriculumVitae {
+  id          String    @id @default(cuid())
+  userId      String    @unique
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  summary     String?
+  phone       String?
+  city        String?
+  cvFileUrl   String?   // PDF o Word subido por el usuario
+  photoUrl    String?
+
+  education   Education[]
+  experience  Experience[]
+  skills      Skill[]
+  languages   Language[]
+  documents   Document[]
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("curriculum_vitae")
+}
+
+model Education {
+  id          String   @id @default(cuid())
+  cvId        String
+  cv          CurriculumVitae @relation(fields: [cvId], references: [id], onDelete: Cascade)
+
+  institution String
+  degree      String
+  field       String?
+  startYear   Int
+  endYear     Int?
+  current     Boolean  @default(false)
+
+  @@map("education")
+}
+
+model Experience {
+  id          String   @id @default(cuid())
+  cvId        String
+  cv          CurriculumVitae @relation(fields: [cvId], references: [id], onDelete: Cascade)
+
+  company     String
+  position    String
+  description String?
+  startDate   DateTime
+  endDate     DateTime?
+  current     Boolean  @default(false)
+
+  @@map("experience")
+}
+
+model Skill {
+  id      String @id @default(cuid())
+  cvId    String
+  cv      CurriculumVitae @relation(fields: [cvId], references: [id], onDelete: Cascade)
+  name    String
+  level   String?
+
+  @@map("skills")
+}
+
+model Language {
+  id      String @id @default(cuid())
+  cvId    String
+  cv      CurriculumVitae @relation(fields: [cvId], references: [id], onDelete: Cascade)
+  name    String
+  level   String
+
+  @@map("languages")
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  cvId      String
+  cv        CurriculumVitae @relation(fields: [cvId], references: [id], onDelete: Cascade)
+  name      String
+  type      String   // diploma, certificado, referencia, portafolio
+  fileUrl   String
+  createdAt DateTime @default(now())
+
+  @@map("documents")
+}
+
+model Company {
+  id          String    @id @default(cuid())
+  userId      String    @unique
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  nit         String?
+  sector      String?
+  description String?
+  website     String?
+  logoUrl     String?
+
+  vacancies   Vacancy[]
+
+  @@map("companies")
+}
+
+model Vacancy {
+  id          String        @id @default(cuid())
+  companyId   String
+  company     Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String
+  area        String
+  type        String        // tiempo completo, medio tiempo, práctica, pasantía
+  location    String?
+  salary      String?
+  requirements String?
+  status      VacancyStatus @default(OPEN)
+
+  applications Application[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("vacancies")
+}
+
+model Application {
+  id          String            @id @default(cuid())
+  userId      String
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vacancyId   String
+  vacancy     Vacancy           @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+  status      ApplicationStatus @default(PENDING)
+  coverLetter String?
+  message     String?
+  appliedAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@unique([userId, vacancyId])
+  @@map("applications")
+}

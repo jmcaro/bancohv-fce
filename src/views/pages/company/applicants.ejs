@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Candidatos | Banco HV FCE</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="bg-unia-gray min-h-screen font-sans">
+<%- include('../../partials/navbar') %>
+<main class="max-w-4xl mx-auto px-4 py-8">
+
+  <a href="/company/vacancies" class="text-sm text-unia-blue hover:underline mb-4 inline-block">← Volver a mis vacantes</a>
+  <h1 class="text-2xl font-bold text-unia-blue mb-1">Candidatos</h1>
+  <p class="text-gray-500 text-sm mb-6"><%= vacancy.title %> · <%= vacancy.applications.length %> postulación<%= vacancy.applications.length !== 1 ? 'es' : '' %></p>
+
+  <% if (vacancy.applications.length === 0) { %>
+    <div class="text-center py-16 text-gray-400">
+      <p class="text-4xl mb-3">👥</p>
+      <p>Aún no hay candidatos para esta vacante.</p>
+    </div>
+  <% } else { %>
+    <% const statusConfig = {
+      PENDING:  { label: 'En revisión',     cls: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
+      REVIEWED: { label: 'Revisada',        cls: 'bg-blue-50 text-blue-700 border-blue-200' },
+      ACCEPTED: { label: 'Aceptado',        cls: 'bg-green-50 text-green-700 border-green-200' },
+      REJECTED: { label: 'No seleccionado', cls: 'bg-red-50 text-red-700 border-red-200' },
+    } %>
+
+    <div class="space-y-6">
+      <% vacancy.applications.forEach(app => { %>
+      <div class="bg-white rounded-xl shadow p-6">
+
+        <!-- Encabezado del candidato -->
+        <div class="flex items-start justify-between gap-4 mb-4">
+          <div class="flex items-center gap-4">
+            <% if (app.user.photo) { %>
+              <img src="<%= app.user.photo %>" class="w-12 h-12 rounded-full object-cover border-2 border-unia-orange" />
+            <% } else { %>
+              <div class="w-12 h-12 rounded-full bg-unia-gray flex items-center justify-center text-xl border-2 border-dashed border-gray-300">👤</div>
+            <% } %>
+            <div>
+              <p class="font-bold text-gray-800"><%= app.user.name %></p>
+              <p class="text-xs text-gray-500"><%= app.user.email %></p>
+              <% if (app.user.cv) { %>
+                <p class="text-xs text-gray-400 mt-0.5">
+                  <%= app.user.cv.experience.length %> exp ·
+                  <%= app.user.cv.education.length %> formación ·
+                  <%= app.user.cv.skills.length %> habilidades
+                </p>
+              <% } %>
+              <p class="text-xs text-gray-400">Postulado: <%= new Date(app.appliedAt).toLocaleDateString('es-CO') %></p>
+            </div>
+          </div>
+          <div class="flex flex-col items-end gap-2 shrink-0">
+            <span class="text-xs font-semibold px-3 py-1 rounded-full border <%= statusConfig[app.status].cls %>">
+              <%= statusConfig[app.status].label %>
+            </span>
+            <div class="flex gap-3">
+              <a href="/company/candidates/<%= app.user.id %>"
+                 class="text-xs text-unia-blue underline hover:text-unia-blue-light">Ver perfil completo</a>
+              <% if (app.user.cv?.cvFileUrl) { %>
+                <a href="<%= app.user.cv.cvFileUrl %>" target="_blank"
+                   class="text-xs text-unia-blue underline hover:text-unia-blue-light">Descargar HV</a>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Carta de presentación -->
+        <% if (app.coverLetter) { %>
+          <div class="mb-4 p-3 bg-unia-gray rounded-lg">
+            <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Carta de presentación</p>
+            <p class="text-sm text-gray-600"><%= app.coverLetter %></p>
+          </div>
+        <% } %>
+
+        <!-- Mensaje previo enviado -->
+        <% if (app.message) { %>
+          <div class="mb-4 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+            <p class="text-xs font-semibold text-blue-600 uppercase mb-1">Mensaje enviado al candidato</p>
+            <p class="text-sm text-blue-800"><%= app.message %></p>
+          </div>
+        <% } %>
+
+        <!-- Formulario de estado + mensaje -->
+        <form action="/company/applications/<%= app.id %>/status" method="POST" class="border-t border-gray-100 pt-4 space-y-3">
+          <div class="flex flex-wrap items-center gap-3">
+            <select name="status" class="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-unia-blue">
+              <% ['PENDING','REVIEWED','ACCEPTED','REJECTED'].forEach(s => { %>
+                <option value="<%= s %>" <%= app.status === s ? 'selected' : '' %>>
+                  <%= {PENDING:'En revisión', REVIEWED:'Revisada', ACCEPTED:'Aceptar', REJECTED:'Rechazar'}[s] %>
+                </option>
+              <% }) %>
+            </select>
+            <span class="text-xs text-gray-400">← Cambia el estado</span>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">
+              Mensaje para el candidato (opcional)
+            </label>
+            <textarea name="message" rows="3" placeholder="Ej: Tu hoja de vida fue revisada y ha sido enviada a la empresa. Estaremos en contacto..."
+                      class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue resize-none"><%= app.message ?? '' %></textarea>
+          </div>
+          <button type="submit"
+                  class="bg-unia-blue text-white font-semibold px-5 py-2 rounded-lg text-sm hover:bg-unia-blue-light transition-colors">
+            Guardar
+          </button>
+        </form>
+
+      </div>
+      <% }) %>
+    </div>
+  <% } %>
+
+</main>
+<%- include('../../partials/footer') %>
+</body>
+</html>

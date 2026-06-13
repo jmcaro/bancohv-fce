@@ -1,0 +1,60 @@
+<nav class="bg-unia-blue text-white shadow-md">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-3">
+      <span class="text-unia-orange font-bold text-xl">FCE</span>
+      <span class="text-sm font-medium hidden sm:block">Banco de Hojas de Vida</span>
+    </a>
+
+    <% if (user) { %>
+    <div class="flex items-center gap-4">
+
+      <!-- Enlaces según rol activo -->
+      <% if (activeRole === 'STUDENT') { %>
+        <a href="/vacancies"            class="text-sm hover:text-unia-orange transition-colors hidden sm:block">Vacantes</a>
+        <a href="/cv"                   class="text-sm hover:text-unia-orange transition-colors hidden sm:block">Mi HV</a>
+        <a href="/vacancies/me/applied" class="text-sm hover:text-unia-orange transition-colors hidden sm:block">Postulaciones</a>
+      <% } %>
+      <% if (activeRole === 'LIDER') { %>
+        <a href="/company/vacancies"     class="text-sm hover:text-unia-orange transition-colors hidden sm:block">Vacantes</a>
+        <a href="/company/vacancies/new" class="text-sm hover:text-unia-orange transition-colors hidden sm:block">+ Vacante</a>
+      <% } %>
+      <% if (activeRole === 'ADMIN') { %>
+        <a href="/admin"                 class="text-sm hover:text-unia-orange transition-colors hidden sm:block">Admin</a>
+        <a href="/vacancies"             class="text-sm hover:text-unia-orange transition-colors hidden sm:block">Vacantes</a>
+        <a href="/company/vacancies/new" class="text-sm hover:text-unia-orange transition-colors hidden sm:block">+ Vacante</a>
+        <a href="/company/vacancies"     class="text-sm hover:text-unia-orange transition-colors hidden sm:block">Mis vacantes</a>
+      <% } %>
+
+      <!-- Selector de rol si tiene más de uno -->
+      <% const userRoles = user.roles ?? [] %>
+      <% if (userRoles.length > 1) { %>
+        <form action="/role/switch" method="POST" class="flex items-center gap-1">
+          <select name="role" onchange="this.form.submit()"
+                  class="text-xs bg-unia-blue border border-unia-orange text-unia-orange rounded px-2 py-1 focus:outline-none cursor-pointer">
+            <% const roleLabels = { STUDENT: '🎓 Estudiante', LIDER: '📋 Líder de Prácticas', ADMIN: '⚙️ Admin' } %>
+            <% userRoles.forEach(r => { %>
+              <option value="<%= r %>" <%= activeRole === r ? 'selected' : '' %>>
+                <%= roleLabels[r] %>
+              </option>
+            <% }) %>
+          </select>
+        </form>
+      <% } %>
+
+      <!-- Avatar -->
+      <div class="flex items-center gap-2">
+        <% if (user.photo) { %>
+          <img src="<%= user.photo %>" alt="<%= user.name %>" class="w-8 h-8 rounded-full border-2 border-unia-orange" />
+        <% } %>
+        <span class="text-sm hidden md:block"><%= user.name.split(' ')[0] %></span>
+      </div>
+
+      <form action="/auth/logout" method="POST">
+        <button class="text-xs bg-unia-orange text-unia-blue font-semibold px-3 py-1 rounded hover:bg-unia-orange-light transition-colors">
+          Salir
+        </button>
+      </form>
+    </div>
+    <% } %>
+  </div>
+</nav>

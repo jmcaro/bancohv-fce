@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Usuarios | Admin</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="bg-unia-gray min-h-screen font-sans">
+<%- include('../../partials/navbar') %>
+<main class="max-w-5xl mx-auto px-4 py-8">
+
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <a href="/admin" class="text-xs text-unia-blue hover:underline">← Admin</a>
+      <h1 class="text-2xl font-bold text-unia-blue mt-1">Usuarios</h1>
+    </div>
+    <span class="text-sm text-gray-500"><%= users.length %> usuario<%= users.length !== 1 ? 's' : '' %></span>
+  </div>
+
+  <!-- Filtros -->
+  <form method="GET" class="bg-white rounded-xl shadow p-4 mb-6 flex flex-wrap gap-3">
+    <input type="text" name="q" value="<%= filters.q ?? '' %>" placeholder="Buscar por nombre o correo..."
+           class="flex-1 min-w-48 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue" />
+    <select name="role" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue">
+      <option value="">Todos los roles</option>
+      <option value="STUDENT"  <%= filters.role === 'STUDENT'  ? 'selected' : '' %>>Estudiante</option>
+      <option value="LIDER"  <%= filters.role === 'LIDER'  ? 'selected' : '' %>>Líder de Prácticas</option>
+      <option value="ADMIN"    <%= filters.role === 'ADMIN'    ? 'selected' : '' %>>Admin</option>
+    </select>
+    <button type="submit" class="bg-unia-blue text-white font-semibold px-4 py-2 rounded-lg text-sm hover:bg-unia-blue-light transition-colors">
+      Filtrar
+    </button>
+  </form>
+
+  <!-- Tabla -->
+  <div class="bg-white rounded-xl shadow overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-unia-blue text-white">
+        <tr>
+          <th class="text-left px-4 py-3 font-semibold">Usuario</th>
+          <th class="text-left px-4 py-3 font-semibold hidden md:table-cell">Correo</th>
+          <th class="text-left px-4 py-3 font-semibold">Rol</th>
+          <th class="text-left px-4 py-3 font-semibold hidden sm:table-cell">Postulaciones</th>
+          <th class="text-left px-4 py-3 font-semibold">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <% users.forEach(u => { %>
+        <tr class="hover:bg-unia-gray/50 transition-colors">
+          <td class="px-4 py-3">
+            <p class="font-medium text-gray-800"><%= u.name %></p>
+            <p class="text-xs text-gray-400 md:hidden"><%= u.email %></p>
+          </td>
+          <td class="px-4 py-3 text-gray-600 hidden md:table-cell"><%= u.email %></td>
+          <td class="px-4 py-3">
+            <form action="/admin/users/<%= u.id %>/role" method="POST" class="space-y-1">
+              <% [['STUDENT','Estudiante'],['LIDER','Líder de Prácticas'],['ADMIN','Admin']].forEach(([val, label]) => { %>
+                <label class="flex items-center gap-1 text-xs cursor-pointer">
+                  <input type="checkbox" name="roles" value="<%= val %>"
+                         <%= (u.roles ?? []).includes(val) ? 'checked' : '' %>
+                         class="accent-unia-blue" />
+                  <%= label %>
+                </label>
+              <% }) %>
+              <button type="submit" class="text-xs bg-unia-blue text-white px-2 py-0.5 rounded mt-1 hover:bg-unia-blue-light">
+                Guardar
+              </button>
+            </form>
+          </td>
+          <td class="px-4 py-3 text-gray-600 hidden sm:table-cell"><%= u._count.applications %></td>
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-3">
+              <a href="/admin/users/<%= u.id %>/cv" class="text-xs text-unia-blue hover:underline">Ver HV</a>
+              <form action="/admin/users/<%= u.id %>/delete" method="POST"
+                    onsubmit="return confirm('¿Eliminar este usuario? Esta acción no se puede deshacer.')">
+                <button class="text-xs text-red-500 hover:text-red-700">Eliminar</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        <% }) %>
+        <% if (users.length === 0) { %>
+        <tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">No se encontraron usuarios.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+<%- include('../../partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= typeof title !== 'undefined' ? title + ' | ' : '' %>Banco HV - FCE Uniatlántico</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="bg-unia-gray min-h-screen font-sans">
+
+  <%- include('../partials/navbar') %>
+
+  <main class="max-w-7xl mx-auto px-4 py-8">
+    <%- body %>
+  </main>
+
+  <%- include('../partials/footer') %>
+
+</body>
+</html>

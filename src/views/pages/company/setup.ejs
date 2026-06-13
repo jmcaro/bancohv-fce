@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Perfil de Empresa | Banco HV FCE</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="bg-unia-gray min-h-screen font-sans">
+<%- include('../../partials/navbar') %>
+<main class="max-w-2xl mx-auto px-4 py-8">
+
+  <h1 class="text-2xl font-bold text-unia-blue mb-6"><%= company ? 'Editar perfil de empresa' : 'Configurar perfil de empresa' %></h1>
+
+  <div class="bg-white rounded-xl shadow p-8">
+    <form action="/company/setup" method="POST" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de la empresa *</label>
+        <input type="text" name="name" value="<%= company?.name ?? '' %>" required
+               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue" />
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">NIT</label>
+          <input type="text" name="nit" value="<%= company?.nit ?? '' %>"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Sector</label>
+          <input type="text" name="sector" value="<%= company?.sector ?? '' %>"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue" />
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Sitio web</label>
+        <input type="url" name="website" value="<%= company?.website ?? '' %>" placeholder="https://..."
+               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+        <textarea name="description" rows="4"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-unia-blue resize-none"><%= company?.description ?? '' %></textarea>
+      </div>
+      <button type="submit" class="w-full bg-unia-blue text-white font-bold py-3 rounded-lg hover:bg-unia-blue-light transition-colors">
+        Guardar perfil
+      </button>
+    </form>
+  </div>
+
+</main>
+<%- include('../../partials/footer') %>
+</body>
+</html>
